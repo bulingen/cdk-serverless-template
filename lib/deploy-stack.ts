@@ -7,47 +7,9 @@ export class DeployStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // const lambdaLayer = new aws_lambda.LayerVersion(this, "BackendLayer", {
-    //   code: aws_lambda.Code.fromAsset(
-    //     path.join(__dirname, "../api/node_modules")
-    //   ),
-    //   compatibleRuntimes: [aws_lambda.Runtime.NODEJS_14_X],
-    // });
-
-    // const handler = new aws_lambda.Function(this, "BackendHandler", {
-    //   runtime: aws_lambda.Runtime.NODEJS_14_X,
-    //   code: aws_lambda.Code.fromAsset("../api/dist"),
-    //   handler: "handler",
-    //   layers: [lambdaLayer],
-    //   environment: {
-    //     NODE_PATH: "$NODE_PATH:/opt",
-    //   },
-    // });
-
-    // /home/bulingen/Code/cdk-serverless-template/api/src
-    // /home/bulingen/Code/cdk-serverless-template/api/src/handler.ts
-
-    const pathToFile = path.join(__dirname, "../../api/src/handler.ts");
-    console.log("BAJS", pathToFile);
-
     const handler = new NodejsFunction(this, "BackendHandler", {
-      // entry: path.join(__dirname, "../api/src/handler.ts"), //"../api/src/handler.ts", // accepts .js, .jsx, .ts, .tsx and .mjs files
-      // entry: "../api/src/handler.ts",
-      // entry: path.join(
-      //   __dirname,
-      //   "..",
-      //   "/",
-      //   "api",
-      //   "/",
-      //   "src",
-      //   "/",
-      //   "handler.ts"
-      // ),
-      // entry: path.join(__dirname, "../api/src/handler.ts"),
-      // entry: pathToFile,
-      // entry: "api/src/handler.ts",
-      entry: "api/dist/handler.js",
-      handler: "handler", // defaults to 'handler',
+      entry: "api/dist/handler.js", // NOTE: Using .js file here. Dependency injection breaks when using .ts for some reason.
+      handler: "handler",
       bundling: {
         externalModules: [
           "class-transformer",
