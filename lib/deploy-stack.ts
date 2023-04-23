@@ -1,5 +1,5 @@
 import * as cdk from "aws-cdk-lib";
-import { aws_apigateway } from "aws-cdk-lib";
+import { aws_apigateway, aws_dynamodb } from "aws-cdk-lib";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import path = require("path");
 
@@ -14,7 +14,7 @@ export class DeployStack extends cdk.Stack {
     //   compatibleRuntimes: [aws_lambda.Runtime.NODEJS_14_X],
     // });
 
-    // const backendLambda = new aws_lambda.Function(this, "BackendHandler", {
+    // const handler = new aws_lambda.Function(this, "BackendHandler", {
     //   runtime: aws_lambda.Runtime.NODEJS_14_X,
     //   code: aws_lambda.Code.fromAsset("../api/dist"),
     //   handler: "handler",
@@ -30,7 +30,7 @@ export class DeployStack extends cdk.Stack {
     const pathToFile = path.join(__dirname, "../../api/src/handler.ts");
     console.log("BAJS", pathToFile);
 
-    const backendLambda = new NodejsFunction(this, "BackendHandler", {
+    const handler = new NodejsFunction(this, "BackendHandler", {
       // entry: path.join(__dirname, "../api/src/handler.ts"), //"../api/src/handler.ts", // accepts .js, .jsx, .ts, .tsx and .mjs files
       // entry: "../api/src/handler.ts",
       // entry: path.join(
@@ -60,7 +60,17 @@ export class DeployStack extends cdk.Stack {
     });
 
     new aws_apigateway.LambdaRestApi(this, "BackendEndpoint", {
-      handler: backendLambda,
+      handler: handler,
     });
+
+    const table = new aws_dynamodb.Table(this, "TemplateTable", {
+      partitionKey: { name: "PK", type: aws_dynamodb.AttributeType.STRING },
+      sortKey: { name: "SK", type: aws_dynamodb.AttributeType.STRING },
+      tableName: `cdk-serverless-template-table`,
+      billingMode: aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+      pointInTimeRecovery: true,
+    });
+
+    table.grantReadWriteData(handler);
   }
 }
