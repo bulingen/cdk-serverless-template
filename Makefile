@@ -9,3 +9,18 @@ help:
 
 api-dev:		## run api in dev mode
 	cd api && yarn start:dev
+
+build-api:
+	cd api && yarn build
+
+build-all: build-api
+
+deploy-whats-built:
+	yarn cdk deploy
+
+check-env:
+ifndef AWS_ACCESS_KEY_ID
+	$(error You don't seem to have an aws-vault session. Run `ave <profile>` to get one)
+endif
+
+deploy: check-env build-all deploy-whats-built		## build and deploy
